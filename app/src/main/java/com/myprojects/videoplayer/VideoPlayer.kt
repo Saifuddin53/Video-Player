@@ -1,12 +1,10 @@
 package com.myprojects.videoplayer
 
-import android.media.browse.MediaBrowser
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.annotation.OptIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
@@ -20,7 +18,7 @@ import androidx.media3.datasource.DefaultDataSourceFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
-import javax.sql.DataSource
+import androidx.media3.ui.PlayerView
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -66,7 +64,7 @@ fun VideoPlayer(
     }
 
     AndroidView(factory = {
-        androidx.media3.ui.PlayerView(context).apply {
+        PlayerView(context).apply {
             hideController()
             useController = false
             resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM

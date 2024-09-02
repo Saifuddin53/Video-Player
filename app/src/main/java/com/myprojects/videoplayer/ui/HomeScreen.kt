@@ -6,7 +6,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -18,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.myprojects.videoplayer.VideoPlayer
 
 @Composable
 fun HomeScreen(
@@ -38,18 +43,27 @@ fun HomeScreen(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Button(
-            onClick = {
-                videoPicker.launch("video/*")
+        if(videoUri != null) {
+            VideoPlayer(videoUrl = videoUri.toString())
+            IconButton(
+                onClick = { videoUri = null },
+                modifier = Modifier.align(Alignment.TopEnd)
+                ) {
+                Icon(imageVector = Icons.Default.Close, contentDescription = "")
             }
-        ) {
-            Text(
-                text = "Upload video",
-                fontSize = 15.sp,
-                color = Color.White,
-                modifier = Modifier.padding(end = 8.dp)
-            )
+        } else {
+            Button(
+                onClick = {
+                    videoPicker.launch("video/*")
+                }
+            ) {
+                Text(
+                    text = "Upload video",
+                    fontSize = 15.sp,
+                    color = Color.White,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+            }
         }
     }
-
 }

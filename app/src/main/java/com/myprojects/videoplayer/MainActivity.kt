@@ -38,8 +38,6 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         if (permissions.all { it.value }) {
-            // All permissions are granted
-            Toast.makeText(this, "Permissions granted!", Toast.LENGTH_SHORT).show()
         } else {
             // At least one permission is denied
             Toast.makeText(this, "Permissions denied!", Toast.LENGTH_SHORT).show()
@@ -65,7 +63,7 @@ class MainActivity : ComponentActivity() {
         when {
             allPermissionsGranted() -> {
                 // Permissions are already granted
-                Toast.makeText(this, "Permissions already granted!", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(this, "Permissions already granted!", Toast.LENGTH_SHORT).show()
             }
             shouldShowRequestPermissionRationale() -> {
                 // Show an explanation to the user
