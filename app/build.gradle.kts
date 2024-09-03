@@ -50,7 +50,10 @@ android {
 }
 
 dependencies {
+    //FFMPEG dependencies
+    implementation(libs.mobile.ffmpeg.full.gpl)
 
+    // Exoplayer dependencies
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.exoplayer.dash)
     implementation(libs.androidx.media3.ui)

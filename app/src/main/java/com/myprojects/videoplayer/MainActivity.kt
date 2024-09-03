@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
         )
     } else {
         arrayOf(
-            Manifest.permission.READ_EXTERNAL_STORAGE
+//            Manifest.permission.READ_EXTERNAL_STORAGE
         )
     }
 
