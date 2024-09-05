@@ -4,22 +4,16 @@ import android.content.Context
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
-import android.provider.MediaStore.Video
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,19 +24,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arthenica.mobileffmpeg.Config.RETURN_CODE_SUCCESS
-import com.arthenica.mobileffmpeg.FFmpeg
+import com.arthenica.ffmpegkit.FFmpegKit
+import com.arthenica.ffmpegkit.ReturnCode
 import com.myprojects.videoplayer.VideoPlayer
-import com.myprojects.videoplayer.VideoState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 
 @Composable
 fun HomeScreen(
-    modifier: Modifier
+    modifier: Modifier,
 ) {
     val context = LocalContext.current
     var videoUri by remember { mutableStateOf<Uri?>(null) }
-    var videoState by remember { mutableStateOf<VideoState>(VideoState.Idle()) }
+    var outputPath by remember{ mutableStateOf<String?>(null) }
 
     val videoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
@@ -57,78 +52,33 @@ fun HomeScreen(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        when(videoState) {
-            is VideoState.Loading -> {
-                Button(
-                    onClick = {
-//                        videoPicker.launch("video/*")
-                    }
-                ) {
-                    Text(
-                        text = "Play",
-                        fontSize = 15.sp,
-                        color = Color.White,
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
+        if(videoUri == null) {
+            Button(
+                onClick = {
+                    videoPicker.launch("video/*")
                 }
-            }
-            is VideoState.Success -> {
-
-            }
-            is VideoState.Error -> {
-
-            }
-            is VideoState.Idle -> {
-                Button(
-                    onClick = {
-                        videoPicker.launch("video/*")
-                    }
-                ) {
-                    Text(
-                        text = videoUri.toString(),
-                        fontSize = 15.sp,
-                        color = Color.White,
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                }
-            }
-            is VideoState.Converting -> {
-                CircularProgressIndicator()
-
-                val customDir = File(context.filesDir, "sideo")  // This creates a folder named "Android" in internal storage
-                if (!customDir.exists()) {
-                    Toast.makeText(context, "Directory doesn't exist!", Toast.LENGTH_SHORT).show()
-                    customDir.mkdir()  // Create the directory if it doesn't exist
-                }
-                val outputPath = File(customDir, "output_video.m3u8").absolutePath  // Complete output path
-
-                val inputPath = getFilePathFromUri(context, videoUri!!)
-
-                // FFMPEG command
-                val command = arrayOf(
-                    "-i", inputPath,  // The input file path (MP4 video)
-                    "-codec", "copy",
-                    "-hls_time", "10",
-                    "-hls_list_size", "0",
-                    "-hls_segment_filename", "${customDir}/segment_%03d.ts",  // The pattern for segment files
-                    outputPath  // The output M3U8 file path
+            ) {
+                Text(
+                    text = videoUri.toString(),
+                    fontSize = 15.sp,
+                    color = Color.White,
+                    modifier = Modifier.padding(end = 8.dp)
                 )
+            }
+        } else {
+            LaunchedEffect(key1 = true) {
+                try {
+                    val videoPath = getFilePathFromUri(context, videoUri!!)
+                    outputPath = convertToHls(context, videoPath!!)
+                }catch (e: Exception) {
 
-                // Execute the command using FFmpeg
-                FFmpeg.executeAsync(command) { executionId, returnCode ->
-                    if (returnCode == RETURN_CODE_SUCCESS) {
-//                        Log.d("FFmpeg", "Conversion success! Output Path: $outputPath")
-                        videoState = VideoState.Loading(outputPath)
-                    } else {
-                        Log.d("FFmpeg", "Conversion failed!")
-                    }
                 }
             }
-            else -> {}
         }
-        if(videoUri != null) {
-            videoState = VideoState.Converting()
-        }
+    }
+
+    if(outputPath != null) {
+        VideoPlayer(videoUrl = outputPath.toString())
     }
 }
 
@@ -145,3 +95,41 @@ fun getFilePathFromUri(context: Context, uri: Uri): String? {
     }
     return filePath
 }
+
+
+suspend fun convertToHls(context: Context, srcPath: String): String? {
+    return withContext(Dispatchers.IO) {
+
+        val dirName = "hls"
+
+        val outputDir = File(
+            context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+            dirName
+        )
+
+        if (!outputDir.exists()) {
+            outputDir.mkdirs()
+        } else {
+            outputDir.listFiles()?.forEach {
+                it.delete()
+            }
+        }
+        val destFile = File(outputDir, "output.m3u8")
+
+
+        val command =
+            "-i $srcPath -codec: copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $destFile"
+
+        val session = FFmpegKit.execute(command)
+
+        return@withContext if (ReturnCode.isSuccess(session.returnCode)) {
+            Log.i("FFmpeg", "Converted successfully")
+            destFile.absolutePath // Return the path of the output file
+        } else {
+            Log.e("FFmpeg", "Failed to convert video.")
+            null
+        }
+    }
+}
+
+

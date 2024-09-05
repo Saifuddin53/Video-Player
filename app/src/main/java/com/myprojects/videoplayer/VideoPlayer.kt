@@ -14,8 +14,10 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
+import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSourceFactory
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
@@ -27,21 +29,24 @@ fun VideoPlayer(
     onVideoReady: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val scope= rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
 
     val exoPlayer = remember {
         ExoPlayer.Builder(context)
             .build()
             .apply {
                 val mediaItem = MediaItem.fromUri(videoUrl)
-                val dataSourceFactory: androidx.media3.datasource.DataSource.Factory = DefaultDataSourceFactory(
+
+                // Use HlsMediaSource for HLS (.m3u8) files
+                val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(
                     context,
                     Util.getUserAgent(context, context.packageName)
                 )
-                val source = ProgressiveMediaSource.Factory(dataSourceFactory)
+                val source = HlsMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(mediaItem)
 
-                this.prepare(source)
+                this.setMediaSource(source)
+                this.prepare()
             }
     }
 
@@ -51,9 +56,11 @@ fun VideoPlayer(
     exoPlayer.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
     exoPlayer.repeatMode = Player.REPEAT_MODE_OFF
 
-    exoPlayer.addListener(object: Player.Listener {
+    exoPlayer.addListener(object : Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
-
+            if (playbackState == Player.STATE_READY) {
+                onVideoReady()
+            }
         }
     })
 

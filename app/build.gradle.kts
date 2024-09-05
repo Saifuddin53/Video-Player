@@ -51,12 +51,13 @@ android {
 
 dependencies {
     //FFMPEG dependencies
-    implementation(libs.mobile.ffmpeg.full.gpl)
+    implementation(libs.ffmpeg.kit.full)
 
     // Exoplayer dependencies
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.exoplayer.dash)
     implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.exoplayer.hls)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
