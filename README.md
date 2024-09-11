@@ -9,7 +9,7 @@ This repository contains the source code for a video player app built using [Exo
 - **User-friendly Interface**: Easy to navigate and select videos for playback and conversion.
 - **Progress Feedback**: A circular progress indicator is displayed during video conversion to inform the user of the ongoing process.
 
-## Screenshots
+## Screens
 
 1. **Home Screen**  
    *The main screen where users can select video files or choose to start a new conversion.*
