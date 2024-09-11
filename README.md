@@ -12,19 +12,15 @@ This repository contains the source code for a video player app built using [Exo
 ## Screenshots
 
 1. **Home Screen**  
-   ![Home Screen](link-to-image)  
    *The main screen where users can select video files or choose to start a new conversion.*
 
 2. **Video Playback**  
-   ![Video Playback](link-to-image)  
    *Playback of an M3U8 video using ExoPlayer.*
 
 3. **MP4 to M3U8 Conversion**  
-   ![Conversion Screen](link-to-image)  
    *Circular progress indicator shown during video conversion.*
 
 4. **Conversion Complete**  
-   ![Conversion Complete](link-to-image)  
    *Success message when the conversion process finishes.*
 
 ## Getting Started
