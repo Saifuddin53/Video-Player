@@ -12,7 +12,7 @@ This repository contains the source code for a video player app built using [Exo
 ## Screens
 
 1. **Home Screen**  
-   *The main screen where users can select video files or choose to start a new conversion.*
+   *The main screen is where users can select video files or start a new conversion.*
 
 2. **Video Playback**  
    *Playback of an M3U8 video using ExoPlayer.*
